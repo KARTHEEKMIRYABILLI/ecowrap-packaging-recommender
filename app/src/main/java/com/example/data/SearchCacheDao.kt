@@ -1,0 +1,23 @@
+package com.example.data
+
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface SearchCacheDao {
+
+  @Query("SELECT * FROM search_cache ORDER BY timestamp DESC LIMIT :limit")
+  fun getRecentSearches(limit: Int = 10): Flow<List<SearchCacheEntity>>
+
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  suspend fun insertSearch(search: SearchCacheEntity): Long
+
+  @Query("DELETE FROM search_cache WHERE `query` = :query")
+  suspend fun deleteByQuery(query: String)
+
+  @Query("DELETE FROM search_cache")
+  suspend fun clearAll()
+}

@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Left Leaf -->
+    <path
+        android:fillColor="#2EB872"
+        android:pathData="M54,68 C40,68 30,56 30,42 C30,30 42,26 52,28 C53,38 48,52 38,58 C44,60 50,56 54,48 Z" />
+    <!-- Right Leaf -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,68 C68,68 78,54 78,40 C78,28 66,24 56,26 C55,36 60,50 70,56 C64,58 58,54 54,46 Z" />
+    <!-- Center Stem / Sprout -->
+    <path
+        android:fillColor="#2EB872"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:pathData="M54,76 C54,62 54,48 54,34" />
+</vector>
+

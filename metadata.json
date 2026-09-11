@@ -1,0 +1,7 @@
+{
+  "name": "ECO WRAP",
+  "description": "AI-Based Intelligent Food Packaging Material Recommendation System for MoFPI (SIH26236)",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+
