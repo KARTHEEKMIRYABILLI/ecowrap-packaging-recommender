@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.components.EcoLeafIcon
+import com.example.components.EcoWrapStartupHeroCard
 import com.example.components.UserAvatar
 import com.example.model.*
 import com.example.ui.theme.*
@@ -92,81 +93,14 @@ fun SplashScreen(
         )
       }
 
-      // Central Hero Illustration Card (Box with fresh produce)
+      // Central Hero Illustration Card with Startup Artwork
       Box(
         modifier = Modifier
           .fillMaxWidth()
-          .padding(vertical = 24.dp),
+          .padding(vertical = 16.dp),
         contentAlignment = Alignment.Center
       ) {
-        Card(
-          shape = RoundedCornerShape(24.dp),
-          colors = CardDefaults.cardColors(containerColor = CardSurface),
-          border = BorderStroke(1.dp, CardBorder),
-          elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-          modifier = Modifier
-            .fillMaxWidth()
-            .height(250.dp)
-        ) {
-          Box(
-            modifier = Modifier
-              .fillMaxSize()
-              .background(
-                Brush.verticalGradient(
-                  colors = listOf(Color(0xFFFCFDFB), PaleSageLight)
-                )
-              ),
-            contentAlignment = Alignment.Center
-          ) {
-            Column(
-              horizontalAlignment = Alignment.CenterHorizontally,
-              verticalArrangement = Arrangement.Center
-            ) {
-              // Corrugated box mockup with fresh produce
-              Box(
-                modifier = Modifier
-                  .size(130.dp)
-                  .background(Color(0xFFE8D4B0), RoundedCornerShape(18.dp))
-                  .border(2.dp, Color(0xFFC7A97A), RoundedCornerShape(18.dp)),
-                contentAlignment = Alignment.Center
-              ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                  Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("🥦", fontSize = 34.sp)
-                    Text("🍅", fontSize = 34.sp)
-                    Text("🎃", fontSize = 34.sp)
-                  }
-                  Spacer(modifier = Modifier.height(6.dp))
-                  Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = ForestGreenPrimary
-                  ) {
-                    Row(
-                      modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                      verticalAlignment = Alignment.CenterVertically
-                    ) {
-                      Text("🌱", fontSize = 11.sp)
-                      Spacer(modifier = Modifier.width(3.dp))
-                      Text(
-                        "Go Green",
-                        color = Color.White,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold
-                      )
-                    }
-                  }
-                }
-              }
-              Spacer(modifier = Modifier.height(12.dp))
-              Text(
-                "Ministry of Food Processing Industries (MoFPI)",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-                color = TextSecondary
-              )
-            }
-          }
-        }
+        EcoWrapStartupHeroCard()
       }
 
       // 3 Circular Badge Highlights
@@ -261,117 +195,41 @@ fun OnboardingScreen(
   onSelectPersona: (PersonaType) -> Unit = {}
 ) {
   var activePage by remember { mutableIntStateOf(0) }
-  var isAutoplayActive by remember { mutableStateOf(true) }
-  var slideProgress by remember { mutableFloatStateOf(0f) }
   val currentSlide = ONBOARDING_SLIDES[activePage]
-
-  // Auto-shift timer: gentle 100ms cadence reduces CPU wake-ups by 60% on low-end chipsets
-  LaunchedEffect(activePage, isAutoplayActive) {
-    if (isAutoplayActive) {
-      val totalDurationMs = 3800L
-      val tickIntervalMs = 100L
-      var elapsedMs = 0L
-      while (elapsedMs < totalDurationMs) {
-        kotlinx.coroutines.delay(tickIntervalMs)
-        elapsedMs += tickIntervalMs
-        slideProgress = (elapsedMs.toFloat() / totalDurationMs.toFloat()).coerceIn(0f, 1f)
-      }
-      slideProgress = 0f
-      activePage = (activePage + 1) % ONBOARDING_SLIDES.size
-    } else {
-      slideProgress = 0f
-    }
-  }
 
   Scaffold(
     topBar = {
-      Column(
+      Row(
         modifier = Modifier
           .fillMaxWidth()
           .background(AppBackground)
+          .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
       ) {
-        Row(
-          modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically
-        ) {
-          // Step Pill indicator with live slide counter
-          Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = PaleSageLight,
-            border = BorderStroke(1.dp, CardBorder)
-          ) {
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-            ) {
-              Text(
-                text = "Slide ${activePage + 1} of ${ONBOARDING_SLIDES.size}",
-                color = ForestGreenPrimary,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-              )
-            }
-          }
-
-          // Interactive Autoplay Toggle Pill
-          Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = if (isAutoplayActive) Color(0xFFF0FDF4) else Color(0xFFFFFBEB),
-            border = BorderStroke(1.dp, if (isAutoplayActive) Color(0xFF86EFAC) else Color(0xFFFCD34D)),
-            modifier = Modifier
-              .clickable { isAutoplayActive = !isAutoplayActive }
-              .testTag("onboarding_autoplay_toggle")
-          ) {
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-            ) {
-              Icon(
-                imageVector = if (isAutoplayActive) Icons.Default.Pause else Icons.Default.PlayArrow,
-                contentDescription = if (isAutoplayActive) "Pause Autoplay" else "Start Autoplay",
-                tint = if (isAutoplayActive) ForestGreenPrimary else Color(0xFFD97706),
-                modifier = Modifier.size(13.dp)
-              )
-              Spacer(modifier = Modifier.width(4.dp))
-              Text(
-                text = if (isAutoplayActive) "Auto-Shift Active" else "Autoplay Paused",
-                color = if (isAutoplayActive) ForestGreenPrimary else Color(0xFFB45309),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
-              )
-            }
-          }
-
-          // Skip action
-          TextButton(
-            onClick = onSkip,
-            modifier = Modifier.testTag("onboarding_skip_button"),
-            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-          ) {
-            Text(
-              "Skip",
-              color = TextSecondary,
-              fontSize = 14.sp,
-              fontWeight = FontWeight.SemiBold
-            )
-          }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+          Text("🌱", fontSize = 18.sp)
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            "EcoWrap",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = ForestGreenPrimary
+          )
         }
 
-        // Live Auto-Shift Progress Bar
-        if (isAutoplayActive) {
-          LinearProgressIndicator(
-            progress = { slideProgress },
-            modifier = Modifier
-              .fillMaxWidth()
-              .height(3.dp),
-            color = MintLeafAccent,
-            trackColor = PaleSageTint
+        // Skip action
+        TextButton(
+          onClick = onSkip,
+          modifier = Modifier.testTag("onboarding_skip_button"),
+          contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+        ) {
+          Text(
+            "Skip",
+            color = TextSecondary,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.SemiBold
           )
-        } else {
-          Spacer(modifier = Modifier.height(3.dp))
         }
       }
     },
@@ -489,10 +347,7 @@ fun OnboardingScreen(
               horizontalArrangement = Arrangement.SpaceEvenly
             ) {
               AssistChip(
-                onClick = {
-                  // User interaction pauses autoplay
-                  isAutoplayActive = false
-                },
+                onClick = {},
                 label = { Text(slide.chip1Label, fontSize = 11.sp, color = ForestGreenPrimary, fontWeight = FontWeight.Medium) },
                 leadingIcon = {
                   Icon(slide.chip1Icon, null, tint = MintLeafAccent, modifier = Modifier.size(14.dp))
@@ -501,9 +356,7 @@ fun OnboardingScreen(
                 border = AssistChipDefaults.assistChipBorder(borderColor = Color(0xFFD1E7DD), enabled = true)
               )
               AssistChip(
-                onClick = {
-                  isAutoplayActive = false
-                },
+                onClick = {},
                 label = { Text(slide.chip2Label, fontSize = 11.sp, color = ForestGreenPrimary, fontWeight = FontWeight.Medium) },
                 leadingIcon = {
                   Icon(slide.chip2Icon, null, tint = MintLeafAccent, modifier = Modifier.size(14.dp))

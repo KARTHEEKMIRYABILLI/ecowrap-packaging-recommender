@@ -1,23 +1,26 @@
 package com.example.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme =
   darkColorScheme(
-    primary = MintLeafAccent,
-    onPrimary = Color.White,
-    primaryContainer = ForestGreenPrimary,
-    onPrimaryContainer = Color.White,
-    secondary = MintGreenLight,
-    background = DarkEmeraldBackground,
-    surface = Color(0xFF0F3D26),
-    onBackground = Color.White,
-    onSurface = Color.White,
+    primary = DarkHeaderText,
+    onPrimary = Color.Black,
+    primaryContainer = DarkPaleSageTint,
+    onPrimaryContainer = DarkHeaderText,
+    secondary = MintLeafAccent,
+    onSecondary = Color.Black,
+    background = DarkAppBackground,
+    surface = DarkCardSurface,
+    onBackground = DarkTextPrimary,
+    onSurface = DarkTextPrimary,
+    surfaceVariant = DarkPaleSageLight,
+    outline = DarkCardBorder
   )
 
 private val LightColorScheme =
@@ -43,6 +46,16 @@ fun MyApplicationTheme(
   content: @Composable () -> Unit,
 ) {
   val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
-  MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
-}
+  val appColors = if (darkTheme) DarkAppThemeColors else LightAppThemeColors
 
+  CompositionLocalProvider(
+    LocalAppColors provides appColors,
+    LocalDarkTheme provides darkTheme
+  ) {
+    MaterialTheme(
+      colorScheme = colorScheme,
+      typography = Typography,
+      content = content
+    )
+  }
+}

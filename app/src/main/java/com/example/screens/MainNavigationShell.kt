@@ -51,7 +51,9 @@ fun MainNavigationShell(
   onOpenGuidelinesDialog: () -> Unit,
   onExportAllReports: () -> Unit,
   onGoogleSignIn: () -> Unit = {},
-  onSyncToFirestore: () -> Unit = {}
+  onSyncToFirestore: () -> Unit = {},
+  isDarkMode: Boolean = false,
+  onToggleDarkMode: () -> Unit = {}
 ) {
   val unreadNotificationsCount = notifications.count { !it.isRead }
 
@@ -193,7 +195,9 @@ fun MainNavigationShell(
             onOpenGuidelinesDialog = onOpenGuidelinesDialog,
             onExportAllReports = onExportAllReports,
             onGoogleSignIn = onGoogleSignIn,
-            onSyncToFirestore = onSyncToFirestore
+            onSyncToFirestore = onSyncToFirestore,
+            isDarkMode = isDarkMode,
+            onToggleDarkMode = onToggleDarkMode
           )
         }
       }

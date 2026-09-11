@@ -31,7 +31,7 @@ object PdfReportGenerator {
     commodity: CommodityItem,
     material: PackagingMaterial,
     storage: StorageConfig,
-    user: UserAccount
+    user: UserAccount = UserAccount("karthikmiryabbelli@gmail.com", "Karthik")
   ): File {
     val pdfDocument = PdfDocument()
 

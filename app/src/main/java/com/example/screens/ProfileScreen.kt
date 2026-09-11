@@ -83,7 +83,9 @@ fun ProfileScreen(
   onOpenGuidelinesDialog: () -> Unit,
   onExportAllReports: () -> Unit,
   onGoogleSignIn: () -> Unit = {},
-  onSyncToFirestore: () -> Unit = {}
+  onSyncToFirestore: () -> Unit = {},
+  isDarkMode: Boolean = false,
+  onToggleDarkMode: () -> Unit = {}
 ) {
   var showAuthDialog by remember { mutableStateOf(false) }
   var isSignUpMode by remember { mutableStateOf(false) }
@@ -259,6 +261,67 @@ fun ProfileScreen(
                   modifier = Modifier.size(20.dp)
                 )
               }
+            }
+          }
+        }
+      }
+
+      // System Appearance & Theme Mode Section
+      item {
+        SectionTitle("System Appearance & Visual Theme")
+        Card(
+          shape = RoundedCornerShape(16.dp),
+          colors = CardDefaults.cardColors(containerColor = AppTheme.colors.cardBackground),
+          border = BorderStroke(1.dp, AppTheme.colors.cardBorder),
+          modifier = Modifier.fillMaxWidth().testTag("profile_theme_toggle_card")
+        ) {
+          Column(modifier = Modifier.padding(14.dp)) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                  modifier = Modifier
+                    .size(40.dp)
+                    .background(AppTheme.colors.paleSageLight, CircleShape),
+                  contentAlignment = Alignment.Center
+                ) {
+                  Icon(
+                    imageVector = if (isDarkMode) Icons.Default.DarkMode else Icons.Default.LightMode,
+                    contentDescription = null,
+                    tint = if (isDarkMode) Color(0xFFFBBF24) else ForestGreenPrimary,
+                    modifier = Modifier.size(20.dp)
+                  )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                  Text(
+                    text = if (isDarkMode) "Dark Emerald Mode" else "Light Mint Mode",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = AppTheme.colors.headerText
+                  )
+                  Text(
+                    text = if (isDarkMode) "High-contrast dark theme for low light" else "Standard bright eco-theme",
+                    fontSize = 11.sp,
+                    color = AppTheme.colors.textSecondary
+                  )
+                }
+              }
+
+              Switch(
+                checked = isDarkMode,
+                onCheckedChange = { onToggleDarkMode() },
+                colors = SwitchDefaults.colors(
+                  checkedThumbColor = Color.White,
+                  checkedTrackColor = MintLeafAccent,
+                  uncheckedThumbColor = Color.White,
+                  uncheckedTrackColor = Color(0xFFD1D5DB)
+                ),
+                modifier = Modifier.testTag("dark_mode_switch")
+              )
             }
           }
         }

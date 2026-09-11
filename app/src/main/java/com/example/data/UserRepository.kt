@@ -29,6 +29,7 @@ class UserRepository(private val context: Context) {
     private const val KEY_USER_AVATAR = "current_user_avatar"
     private const val KEY_SELECTED_PERSONA = "selected_persona"
     private const val KEY_USERS_RECORDED = "users_recorded_list"
+    private const val KEY_DARK_MODE = "is_dark_mode_enabled"
 
     val DEFAULT_USER = UserAccount(
       email = "karthikmiryabbelli@gmail.com",
@@ -270,5 +271,13 @@ class UserRepository(private val context: Context) {
     saveSelectedPersona(persona)
     saveUser(updatedUser, makeActive = true)
     return updatedUser
+  }
+
+  fun getDarkMode(): Boolean {
+    return prefs.getBoolean(KEY_DARK_MODE, false)
+  }
+
+  fun saveDarkMode(isDark: Boolean) {
+    prefs.edit().putBoolean(KEY_DARK_MODE, isDark).apply()
   }
 }

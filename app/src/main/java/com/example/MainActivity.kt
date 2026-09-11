@@ -47,8 +47,19 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
     setContent {
-      MyApplicationTheme {
-        EcoWrapApp()
+      val context = LocalContext.current
+      val userRepository = remember { UserRepository(context) }
+      var isDarkMode by remember { mutableStateOf(userRepository.getDarkMode()) }
+      val onToggleDarkMode = {
+        isDarkMode = !isDarkMode
+        userRepository.saveDarkMode(isDarkMode)
+      }
+
+      MyApplicationTheme(darkTheme = isDarkMode) {
+        EcoWrapApp(
+          isDarkMode = isDarkMode,
+          onToggleDarkMode = onToggleDarkMode
+        )
       }
     }
   }
@@ -56,7 +67,10 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EcoWrapApp() {
+fun EcoWrapApp(
+  isDarkMode: Boolean = false,
+  onToggleDarkMode: () -> Unit = {}
+) {
   val context = LocalContext.current
   val userRepository = remember { UserRepository(context) }
   val packagingRepository = remember { PackagingRepository.getInstance(context) }
@@ -406,11 +420,13 @@ fun EcoWrapApp() {
   var compareMaterialAName by remember { mutableStateOf<String?>("Breathable / Micro-Perforated Film") }
   var compareMaterialBName by remember { mutableStateOf<String?>("Biodegradable Film (PLA / PBAT)") }
 
+  val appColors = AppTheme.colors
+
   // Responsive desktop / mobile container: Centered box max-width 480.dp with subtle frame
   Box(
     modifier = Modifier
       .fillMaxSize()
-      .background(Color(0xFFE5E7EB)),
+      .background(if (isDarkMode) Color(0xFF060D0B) else Color(0xFFE5E7EB)),
     contentAlignment = Alignment.Center
   ) {
     Box(
@@ -419,7 +435,7 @@ fun EcoWrapApp() {
         .widthIn(max = 480.dp)
         .fillMaxWidth()
         .shadow(12.dp, RoundedCornerShape(0.dp))
-        .background(AppBackground)
+        .background(appColors.background)
     ) {
       // Screen Router with smooth transitions
       AnimatedContent(
@@ -560,7 +576,9 @@ fun EcoWrapApp() {
             onOpenGuidelinesDialog = { showGuidelinesDialog = true },
             onExportAllReports = { showExportReportsSuccessDialog = true },
             onGoogleSignIn = onGoogleSignIn,
-            onSyncToFirestore = onSyncToFirestore
+            onSyncToFirestore = onSyncToFirestore,
+            isDarkMode = isDarkMode,
+            onToggleDarkMode = onToggleDarkMode
           )
 
           AppScreen.COMMODITY_SELECTION -> CommoditySelectionScreen(
@@ -675,6 +693,15 @@ fun EcoWrapApp() {
               feedbackCommodityName = selectedCommodity.name
               showFeedbackDialog = true
             },
+            onSubmitFeedback = { feedback ->
+              feedbacksList = listOf(feedback) + feedbacksList
+              triggerNotification(
+                "Feedback Submitted",
+                "Thank you for rating packaging accuracy for ${feedback.commodityName}.",
+                NotificationType.SYSTEM,
+                feedback.commodityName
+              )
+            },
             onDownloadPdf = {
               triggerNotification(
                 "Packaging Report Downloaded",
@@ -690,7 +717,8 @@ fun EcoWrapApp() {
             },
             onOpenInfographic = {
               currentScreen = AppScreen.ENVIRONMENTAL_INFOGRAPHIC
-            }
+            },
+            onToggleDarkMode = onToggleDarkMode
           )
 
           AppScreen.DETAIL_WHY_THIS -> DetailWhyThisScreen(
@@ -791,34 +819,6 @@ fun EcoWrapApp() {
               PdfReportGenerator.openPdfFile(context, pdfFile)
             }
           )
-        }
-      }
-
-      // Floating Screen Switcher Pill Button (Top-Right overlay for evaluator jumping directly to any screen)
-      Box(
-        modifier = Modifier
-          .align(Alignment.TopEnd)
-          .padding(top = 40.dp, end = 12.dp)
-      ) {
-        Surface(
-          shape = RoundedCornerShape(20.dp),
-          color = ForestGreenPrimary.copy(alpha = 0.9f),
-          shadowElevation = 4.dp,
-          modifier = Modifier.clickable { showScreenPickerSheet = true }
-        ) {
-          Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Icon(Icons.Default.Layers, contentDescription = "Screens", tint = Color.White, modifier = Modifier.size(14.dp))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-              "S${currentScreen.screenNumber}/16",
-              fontSize = 11.sp,
-              fontWeight = FontWeight.Bold,
-              color = Color.White
-            )
-          }
         }
       }
 

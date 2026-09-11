@@ -32,6 +32,7 @@ import com.example.components.*
 import com.example.model.*
 import com.example.ui.theme.*
 import com.example.utils.PdfReportGenerator
+import com.example.utils.SocialShareHelper
 import com.example.utils.rememberAppHaptics
 import java.io.File
 import kotlinx.coroutines.delay
@@ -286,12 +287,16 @@ fun RecommendationResultScreen(
   onNavigateBack: () -> Unit,
   onShare: () -> Unit,
   onOpenFeedback: () -> Unit = {},
+  onSubmitFeedback: (UserFeedback) -> Unit = {},
   onDownloadPdf: () -> Unit = {},
   onNavigateToComparison: (String?, String?) -> Unit = { _, _ -> },
-  onOpenInfographic: () -> Unit = {}
+  onOpenInfographic: () -> Unit = {},
+  onToggleDarkMode: () -> Unit = {}
 ) {
   val context = LocalContext.current
   val haptics = rememberAppHaptics()
+  val colors = AppTheme.colors
+  val isDark = AppTheme.isDark
   var generatedPdfFile by remember { mutableStateOf<File?>(null) }
   var showPdfSuccessDialog by remember { mutableStateOf(false) }
   var showInAppShareDialog by remember { mutableStateOf(false) }
@@ -329,33 +334,47 @@ fun RecommendationResultScreen(
       Row(
         modifier = Modifier
           .fillMaxWidth()
+          .background(colors.background)
           .padding(horizontal = 8.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
       ) {
         IconButton(onClick = onNavigateBack, modifier = Modifier.testTag("recommendation_back")) {
-          Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = ForestGreenPrimary)
+          Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = colors.headerText)
         }
         Text(
           "AI Recommendation",
           fontSize = 18.sp,
           fontWeight = FontWeight.Bold,
-          color = ForestGreenPrimary
+          color = colors.headerText
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
+          IconButton(onClick = onToggleDarkMode, modifier = Modifier.testTag("toggle_dark_mode_top_btn")) {
+            Icon(
+              imageVector = if (isDark) Icons.Default.LightMode else Icons.Default.DarkMode,
+              contentDescription = "Toggle Dark Mode",
+              tint = if (isDark) Color(0xFFFBBF24) else ForestGreenPrimary
+            )
+          }
           IconButton(onClick = triggerPdfDownload, modifier = Modifier.testTag("download_pdf_top_bar_btn")) {
-            Icon(Icons.Default.PictureAsPdf, contentDescription = "Download PDF", tint = ForestGreenPrimary)
+            Icon(Icons.Default.PictureAsPdf, contentDescription = "Download PDF", tint = colors.headerText)
           }
           IconButton(onClick = onOpenFeedback, modifier = Modifier.testTag("rate_top_bar_btn")) {
             Icon(Icons.Default.Star, contentDescription = "Rate", tint = Color(0xFFF59E0B))
           }
-          IconButton(onClick = { showInAppShareDialog = true }) {
-            Icon(Icons.Default.Share, contentDescription = "Share", tint = ForestGreenPrimary)
+          IconButton(
+            onClick = {
+              haptics.performClick()
+              SocialShareHelper.shareReportViaChooser(context, commodity, material, storage)
+            },
+            modifier = Modifier.testTag("share_top_bar_btn")
+          ) {
+            Icon(Icons.Default.Share, contentDescription = "Share", tint = colors.headerText)
           }
         }
       }
     },
-    containerColor = AppBackground
+    containerColor = colors.background
   ) { padding ->
     Column(
       modifier = Modifier
@@ -863,13 +882,13 @@ fun RecommendationResultScreen(
 
       LazyRow(
         horizontalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
+        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp)
       ) {
         items(alternatives) { alt ->
           Card(
             shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            border = BorderStroke(1.dp, CardBorder),
+            colors = CardDefaults.cardColors(containerColor = colors.cardBackground),
+            border = BorderStroke(1.dp, colors.cardBorder),
             modifier = Modifier
               .width(110.dp)
               .clickable {
@@ -884,7 +903,7 @@ fun RecommendationResultScreen(
               Box(
                 modifier = Modifier
                   .size(50.dp)
-                  .background(PaleSageLight, RoundedCornerShape(10.dp)),
+                  .background(colors.paleSageLight, RoundedCornerShape(10.dp)),
                 contentAlignment = Alignment.Center
               ) {
                 Text(
@@ -901,7 +920,7 @@ fun RecommendationResultScreen(
                 text = alt.first,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary,
+                color = colors.textPrimary,
                 textAlign = TextAlign.Center,
                 maxLines = 1
               )
@@ -910,12 +929,93 @@ fun RecommendationResultScreen(
                 text = "${alt.second}%",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = if (alt.second >= 80) ForestGreenPrimary else Color(0xFFEA580C)
+                color = if (alt.second >= 80) (if (isDark) MintLeafAccent else ForestGreenPrimary) else Color(0xFFEA580C)
               )
             }
           }
         }
       }
+
+      // -------------------------------------------------------------
+      // SOCIAL SHARING ACTIONS CARD (Android Share Intent)
+      // -------------------------------------------------------------
+      Card(
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = colors.cardBackground),
+        border = BorderStroke(1.dp, colors.cardBorder),
+        modifier = Modifier.fillMaxWidth().testTag("social_sharing_section_card")
+      ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Box(
+              modifier = Modifier
+                .size(36.dp)
+                .background(colors.paleSageLight, CircleShape),
+              contentAlignment = Alignment.Center
+            ) {
+              Icon(Icons.Default.Share, contentDescription = null, tint = colors.headerText, modifier = Modifier.size(18.dp))
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+              Text("Social & Messaging Sharing", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = colors.headerText)
+              Text("Share advisory summary & PDF report via external apps", fontSize = 11.5.sp, color = colors.textSecondary)
+            }
+          }
+
+          Spacer(modifier = Modifier.height(12.dp))
+
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+          ) {
+            Button(
+              onClick = {
+                haptics.performClick()
+                SocialShareHelper.shareReportViaChooser(context, commodity, material, storage)
+              },
+              colors = ButtonDefaults.buttonColors(containerColor = if (isDark) MintLeafAccent else ForestGreenPrimary),
+              shape = RoundedCornerShape(10.dp),
+              modifier = Modifier.weight(1f).height(42.dp).testTag("share_apps_intent_btn")
+            ) {
+              Icon(Icons.Default.Share, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
+              Spacer(modifier = Modifier.width(6.dp))
+              Text("Share via Apps", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            }
+
+            OutlinedButton(
+              onClick = {
+                showInAppShareDialog = true
+              },
+              shape = RoundedCornerShape(10.dp),
+              border = BorderStroke(1.dp, colors.cardBorder),
+              modifier = Modifier.weight(1f).height(42.dp).testTag("share_options_dialog_btn")
+            ) {
+              Icon(Icons.Default.Tune, contentDescription = null, tint = colors.headerText, modifier = Modifier.size(15.dp))
+              Spacer(modifier = Modifier.width(6.dp))
+              Text("More Options", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = colors.headerText)
+            }
+          }
+        }
+      }
+
+      Spacer(modifier = Modifier.height(16.dp))
+
+      // -------------------------------------------------------------
+      // INLINE AI ACCURACY FEEDBACK FORM
+      // -------------------------------------------------------------
+      InlineFeedbackCard(
+        commodityName = commodity.name,
+        materialName = material.name,
+        userEmail = user.email,
+        onSubmitFeedback = { feedback ->
+          onSubmitFeedback(feedback)
+          haptics.performSuccess()
+        },
+        modifier = Modifier.fillMaxWidth().padding(bottom = 30.dp)
+      )
       }
     }
   }
